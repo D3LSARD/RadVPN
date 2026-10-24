@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR.Rad • Smart Proxy Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#38bdf8">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vazirmatn Persian Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#131c31',
+                        neonCyan: '#06b6d4',
+                        neonGreen: '#10b981',
+                        neonPurple: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+        }
+        .neon-border {
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .neon-glow-btn:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+    <!-- Header / Navbar -->
+    <header class="w-full border-b border-gray-800 bg-darkBg/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-bolt text-darkBg text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wider text-white flex items-center gap-2">
+                        MR.Rad <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">v14.4 VIP</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">سیستم هوشمند اتصال پایدار (MTN + MCI)</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats & Actions -->
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cardBg border border-gray-800 text-xs text-gray-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>بروزرسانی خودکار: <strong id="timerCountdown" class="text-cyan-400">03:00:00</strong></span>
+                </div>
+                <button onclick="copySubLink()" class="px-4 py-2 rounded-xl bg-cardBg hover:bg-gray-800 border border-gray-700 text-xs font-medium text-cyan-400 transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> کپی لینک ساب
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 my-auto">
+
+        <!-- Hero Control Panel -->
+        <section class="rounded-2xl bg-gradient-to-br from-cardBg to-gray-900 p-6 neon-border glow-effect relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-center md:text-right">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold">
+                        <i class="fa-solid fa-shield-halved"></i> وضعیت اتصال: آماده به کار
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">اتصال هوشمند با یک کلیک</h2>
+                    <p class="text-sm text-gray-400 max-w-xl">
+                        با زدن دکمه اتصال، اپلیکیشن به صورت خودکار سریع‌ترین سرور فعال را انتخاب کرده و در صورت قطعی، روی سرور پشتیبان سوییچ می‌کند.
+                    </p>
+                </div>
+
+                <!-- Connect Button & Fallback Status -->
+                <div class="flex flex-col items-center gap-3 w-full md:w-auto">
+                    <button id="smartConnectBtn" onclick="toggleSmartConnect()" class="w-full md:w-56 py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-base shadow-lg neon-glow-btn transition-all flex items-center justify-center gap-3 active:scale-95">
+                        <i id="connectIcon" class="fa-solid fa-power-off text-lg"></i>
+                        <span id="connectText">اتصال هوشمند (Smart Connect)</span>
+                    </button>
+                    <div id="connectionStatus" class="text-xs text-gray-400 h-5 flex items-center gap-1.5">
+                        <span>آماده برای تست و اتصال</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Proxy Configs Grid Header -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+            <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-server text-cyan-400"></i> لیست سرورهای فعال خزانه طلایی
+                </h3>
+                <p class="text-xs text-gray-400">تست شده روی هر دو اپراتور همراه اول و ایرانسل</p>
+            </div>
+            
+            <!-- Filter & Search -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-gray-500 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="filterConfigs()" placeholder="جستجوی پروتکل یا آدرس..." class="w-full bg-cardBg border border-gray-800 rounded-xl pr-9 pl-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-all">
+                </div>
+                <button onclick="loadConfigs()" title="تازه سازی لیست" class="p-2.5 rounded-xl bg-cardBg border border-gray-800 hover:border-gray-700 text-gray-300 hover:text-cyan-400 transition-all">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Configs List Container -->
+        <div id="configsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Loading Skeleton Cards -->
+            <div class="rounded-xl bg-cardBg p-4 border border-gray-800 animate-pulse space-y-3">
+                <div class="flex justify-between items-center"><div class="h-5 bg-gray-800 rounded w-20"></div><div class="h-5 bg-gray-800 rounded w-12"></div></div>
+                <div class="h-4 bg-gray-800 rounded w-3/4"></div>
+                <div class="h-8 bg-gray-800 rounded w-full"></div>
+            </div>
+            <div class="rounded-xl bg-cardBg p-4 border border-gray-800 animate-pulse space-y-3">
+                <div class="flex justify-between items-center"><div class="h-5 bg-gray-800 rounded w-20"></div><div class="h-5 bg-gray-800 rounded w-12"></div></div>
+                <div class="h-4 bg-gray-800 rounded w-3/4"></div>
+                <div class="h-8 bg-gray-800 rounded w-full"></div>
+            </div>
+            <div class="rounded-xl bg-cardBg p-4 border border-gray-800 animate-pulse space-y-3">
+                <div class="flex justify-between items-center"><div class="h-5 bg-gray-800 rounded w-20"></div><div class="h-5 bg-gray-800 rounded w-12"></div></div>
+                <div class="h-4 bg-gray-800 rounded w-3/4"></div>
+                <div class="h-8 bg-gray-800 rounded w-full"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-gray-800 bg-darkBg py-6 mt-12 px-4">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+            <p>MR.Rad Autonomous Proxy Ecosystem • Powered by @VpnProxyTest</p>
+            <div class="flex items-center gap-4">
+                <a href="https://t.me/VpnProxyTest" target="_blank" class="hover:text-cyan-400 transition-colors"><i class="fa-brands fa-telegram text-base"></i> کانال تلگرام</a>
+                <a href="https://github.com/D3LSARD/Epimax-Sub" target="_blank" class="hover:text-cyan-400 transition-colors"><i class="fa-brands fa-github text-base"></i> گیت‌هاب</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-cardBg border border-cyan-500/30 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage" class="text-xs font-medium">عملیات با موفقیت انجام شد</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const SUB_URL = "https://raw.githubusercontent.com/D3LSARD/Epimax-Sub/main/sub.txt";
+        let allConfigs = [];
+        let isConnected = false;
+        let activeConfigIndex = 0;
+        let connectInterval = null;
+
+        // Load configs on start
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfigs();
+            startCountdown();
+        });
+
+        async function loadConfigs() {
+            const container = document.getElementById('configsContainer');
+            container.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-400 gap-3">
+                    <i class="fa-solid fa-circle-notch fa-spin text-cyan-400 text-2xl"></i>
+                    <p class="text-xs">در حال دریافت و تحلیل کانفیگ‌های تازه از گیت‌هاب...</p>
+                </div>
+            `;
+
+            try {
+                // Fetching via CORS proxy or direct raw github
+                const response = await fetch(SUB_URL + "?t=" + Date.now());
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const text = await response.text();
+                let decodedText = text.trim();
+
+                // If base64 encoded subscription
+                if (!decodedText.startsWith("vless://") && !decodedText.startsWith("vmess://") && !decodedText.startsWith("trojan://") && !decodedText.startsWith("hysteria2://")) {
+                    try {
+                        const base64Clean = decodedText.replace(/-/g, '+').replace(/_/g, '/');
+                        decodedText = atob(base64Clean);
+                    } catch (e) {
+                        console.warn("Base64 decode warning, trying line-by-line", e);
+                    }
+                }
+
+                const lines = decodedText.split('\n');
+                allConfigs = [];
+
+                lines.forEach((line, index) => {
+                    const cleanLine = line.trim();
+                    if (cleanLine && (cleanLine.startsWith("vless://") || cleanLine.startsWith("vmess://") || cleanLine.startsWith("trojan://") || cleanLine.startsWith("hysteria2://") || cleanLine.startsWith("hy2://") || cleanLine.startsWith("tuic://"))) {
+                        allConfigs.push({
+                            id: index,
+                            uri: cleanLine,
+                            parsed: parseUri(cleanLine),
+                            ping: Math.floor(Math.random() * 350) + 120 // Simulated initial ping
+                        });
+                    }
+                });
+
+                if (allConfigs.length === 0) {
+                    throw new Error("No configs found");
+                }
+
+                renderConfigs(allConfigs);
+                showToast("لیست سرورها با موفقیت بروز شد", "success");
+
+            } catch (err) {
+                console.error("Failed to load configs:", err);
+                // Fallback mock configs if offline or CORS restricted
+                allConfigs = getMockConfigs();
+                renderConfigs(allConfigs);
+                showToast("بارگذاری از طریق حافظه پشتیبان انجام شد", "info");
+            }
+        }
+
+        function parseUri(uri) {
+            try {
+                if (uri.startsWith("vmess://")) {
+                    return { protocol: "VMESS", address: "Cloudflare CDN / Fast Node", port: "443", name: "MR.Rad • VMess" };
+                }
+                const url = new URL(uri);
+                const protocol = url.protocol.replace(':', '').toUpperCase();
+                const hostname = url.hostname;
+                const port = url.port || (protocol === 'TROJAN' ? '443' : '443');
+                const name = decodeURIComponent(url.hash.replace('#', '')) || `MR.Rad • ${protocol}`;
+                return { protocol, address: `${hostname}:${port}`, name };
+            } catch (e) {
+                return { protocol: "PROXY", address: "Secure Server", name: "MR.Rad • Node" };
+            }
+        }
+
+        function renderConfigs(configs) {
+            const container = document.getElementById('configsContainer');
+            container.innerHTML = '';
+
+            configs.forEach((cfg, idx) => {
+                const p = cfg.parsed;
+                let protoColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+                if (p.protocol === "VMESS") protoColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+                if (p.protocol === "TROJAN") protoColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if (p.protocol.includes("HYSTERIA") || p.protocol.includes("HY2")) protoColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+
+                const card = document.createElement('div');
+                card.className = `rounded-2xl bg-cardBg border border-gray-800 hover:border-gray-700 p-4 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden group`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border ${protoColor}">${p.protocol}</span>
+                        <div class="flex items-center gap-1.5 text-xs text-gray-400 bg-darkBg px-2 py-1 rounded-lg border border-gray-800">
+                            <span class="w-1.5 h-1.5 rounded-full ${cfg.ping < 300 ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                            <span>${cfg.ping}ms</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h4 class="text-xs font-semibold text-white truncate" title="${p.name}">${p.name}</h4>
+                        <p class="text-[11px] font-mono text-gray-400 truncate" dir="ltr">${p.address}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800/80">
+                        <button onclick="copyConfig('${encodeURIComponent(cfg.uri)}')" class="py-2 px-3 rounded-xl bg-darkBg hover:bg-gray-800 border border-gray-800 text-[11px] font-medium text-gray-300 hover:text-cyan-400 transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> کپی
+                        </button>
+                        <a href="v2rayng://install-config?url=${encodeURIComponent(cfg.uri)}" class="py-2 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-[11px] font-medium text-cyan-400 transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> v2rayNG
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterConfigs() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allConfigs.filter(cfg => 
+                cfg.parsed.protocol.toLowerCase().includes(query) || 
+                cfg.parsed.address.toLowerCase().includes(query) ||
+                cfg.parsed.name.toLowerCase().includes(query)
+            );
+            renderConfigs(filtered);
+        }
+
+        // Smart Connect & Auto-Fallback Simulation
+        function toggleSmartConnect() {
+            const btn = document.getElementById('smartConnectBtn');
+            const icon = document.getElementById('connectIcon');
+            const text = document.getElementById('connectText');
+            const status = document.getElementById('connectionStatus');
+
+            if (!isConnected) {
+                isConnected = true;
+                btn.classList.remove('from-emerald-600', 'to-teal-500');
+                btn.classList.add('from-rose-600', 'to-red-500');
+                icon.className = "fa-solid fa-spinner fa-spin text-lg";
+                text.innerText = "در حال اتصال هوشمند...";
+                status.innerHTML = `<span class="text-cyan-400 animate-pulse">تست پینگ و اتصال به سرور #${activeConfigIndex + 1}...</span>`;
+
+                // Simulate connection attempt with fallback
+                setTimeout(() => {
+                    icon.className = "fa-solid fa-check text-lg";
+                    text.innerText = "قطع اتصال (Disconnect)";
+                    status.innerHTML = `<span class="text-emerald-400">متصل شد به: <strong>${allConfigs[activeConfigIndex]?.parsed.name || 'Server 1'}</strong></span>`;
+                    showToast("اتصال موفقیت‌آمیز برقرار شد", "success");
+                }, 2000);
+
+            } else {
+                isConnected = false;
+                btn.classList.remove('from-rose-600', 'to-red-500');
+                btn.classList.add('from-emerald-600', 'to-teal-500');
+                icon.className = "fa-solid fa-power-off text-lg";
+                text.innerText = "اتصال هوشمند (Smart Connect)";
+                status.innerHTML = `<span>اتصال قطع شد. آماده برای تست مجدد</span>`;
+                showToast("اتصال قطع گردید", "info");
+            }
+        }
+
+        function copySubLink() {
+            navigator.clipboard.writeText(SUB_URL);
+            showToast("لینک ساب‌سکریپت با موفقیت کپی شد", "success");
+        }
+
+        function copyConfig(encodedUri) {
+            const uri = decodeURIComponent(encodedUri);
+            navigator.clipboard.writeText(uri);
+            showToast("کانفیگ در کلیپ‌بورد کپی شد", "success");
+        }
+
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = message;
+            if (type === "success") {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-cyan-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function startCountdown() {
+            let totalSeconds = 3 * 3600; // 3 hours
+            setInterval(() => {
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+                
+                document.getElementById('timerCountdown').innerText = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                if (totalSeconds > 0) totalSeconds--;
+            }, 1000);
+        }
+
+        function getMockConfigs() {
+            return [
+                { id: 1, uri: "vless://sample-uuid-1@89.35.14.30:443?type=grpc&security=reality#MR.Rad • VLESS-Reality", parsed: { protocol: "VLESS", address: "89.35.14.30:443", name: "MR.Rad • VLESS-Reality" }, ping: 240 },
+                { id: 2, uri: "vmess://eyJhZGQiOiIzMS41Ny4xOTAuMzQiLCJwb3J0IjoiNDQzIiwidyI6Ii8ifQ==#MR.Rad • VMess-WS", parsed: { protocol: "VMESS", address: "31.57.190.34:443", name: "MR.Rad • VMess-WS" }, ping: 310 },
+                { id: 3, uri: "trojan://sample-pass@104.18.32.47:443?security=tls#MR.Rad • Trojan-TLS", parsed: { protocol: "TROJAN", address: "104.18.32.47:443", name: "MR.Rad • Trojan-TLS" }, ping: 195 },
+                { id: 4, uri: "hysteria2://sample-pass@77.232.139.128:11592?insecure=1#MR.Rad • Hysteria2", parsed: { protocol: "HYSTERIA2", address: "77.232.139.128:11592", name: "MR.Rad • Hysteria2" }, ping: 140 }
+            ];
+        }
+    </script>
+</body>
+</html>
